@@ -34,8 +34,8 @@ public class Validation {
     /**
      * Validate an object with Validation annotations
      * 
-     * @param object
-     * @throws ValidationException 
+     * @param object whose properties have to be validated
+     * @throws ValidationException if the validation of a property has failed
      */
     public void validate(Object object) throws ValidationException {
         Logger.getLogger(Validation.class.getName()).fine("Validating entity!");
@@ -49,9 +49,9 @@ public class Validation {
     /**
      * Validate a specific field
      * 
-     * @param object
-     * @param field
-     * @throws ValidationException 
+     * @param object whose properties have to be validated
+     * @param field of the object to validate, all other fields are ignored
+     * @throws ValidationException if the validation of the property has failed
      */
     public void validate(Object object, Field field) throws ValidationException {
         if (!requiresValidation(field)) {
@@ -93,7 +93,7 @@ public class Validation {
     /**
      * Helper method to determine, whether the field requires validation
      * 
-     * @param field 
+     * @param field to check
      */
     private boolean requiresValidation(Field field) {        
         for (Class validationAnnotation : validationMap.keySet()) {
@@ -108,8 +108,8 @@ public class Validation {
     /**
      * Helper method to find the get method for a given field
      * 
-     * @param field
-     * @return 
+     * @param field to find the get method for
+     * @return the get method or null if no get method is found
      */
     private Method getGetter(Object object, Field field) {
         String name = field.getName();

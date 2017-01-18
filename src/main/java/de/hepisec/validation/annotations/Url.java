@@ -15,12 +15,16 @@ import java.lang.annotation.Target;
 public @interface Url {
     /**
      * list of allowed protocols for this URL, e.g. {"http", "https"}
+     * 
+     * @return array with allowed protocols
      */
     String[] allowedProtocols();
     /**
      * list of allowed HTTP status codes, e.g. {200, 301, 302, 303}
      * 
      * by default HTTP status codes won't be checked
+     * 
+     * @return array with allowed HTTP status codes
      */
     int[] checkHttpStatus() default {};
 }

@@ -15,6 +15,8 @@ import java.lang.annotation.Target;
 public @interface PossibleValues {
     /**
      * List of allowed Strings for the annotated field
+     *
+     * @return array with allowed values
      */
     String[] value();
 }
