@@ -4,6 +4,7 @@ import de.hepisec.validation.Validation;
 import de.hepisec.validation.ValidationException;
 import de.hepisec.validation.annotations.NotNullOrEmpty;
 import de.hepisec.validation.annotations.PossibleValues;
+import de.hepisec.validation.annotations.Range;
 import de.hepisec.validation.annotations.Url;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,6 +153,51 @@ public class ValidationTest {
         }        
     }
     
+    @Test
+    public void testRange() {
+        ClassWithRange object = new ClassWithRange();
+        Validation validation = new Validation();
+        
+        try {
+            validation.validate(object);
+        } catch (ValidationException ex) {
+            fail("Range on valid Range");
+        } 
+
+        object.setLongNumber(1000);
+        
+        try {
+            validation.validate(object);
+            fail("Range on invalid Range (gt max long)");
+        } catch (ValidationException ex) {
+        } 
+
+        object.setLongNumber(0);
+        
+        try {
+            validation.validate(object);
+            fail("Range on invalid Range (lt min long)");
+        } catch (ValidationException ex) {
+        } 
+
+        object.setLongNumber(50);
+        object.setIntNumber(1000);
+        
+        try {
+            validation.validate(object);
+            fail("Range on invalid Range (gt max int)");
+        } catch (ValidationException ex) {
+        }         
+        
+        object.setIntNumber(0);
+        
+        try {
+            validation.validate(object);
+            fail("Range on invalid Range (lt min int)");
+        } catch (ValidationException ex) {
+        }                 
+    }
+    
     public class ClassWithValidation {
         @NotNullOrEmpty
         private String notNullOrEmpty = "notNullOrEmpty";
@@ -208,6 +254,30 @@ public class ValidationTest {
 
         public void setUrl(String url) {
             this.url = url;
+        }
+    }
+    
+    public class ClassWithRange {
+        @Range(min = 10, max = 100)
+        private long longNumber = 50;
+        
+        @Range(min = 10, max = 100)
+        private int intNumber = 50;
+        
+        public long getLongNumber() {
+            return longNumber;
+        }
+        
+        public void setLongNumber(long longNumber) {
+            this.longNumber = longNumber;
+        }
+
+        public int getIntNumber() {
+            return intNumber;
+        }
+
+        public void setIntNumber(int intNumber) {
+            this.intNumber = intNumber;
         }
     }
 }

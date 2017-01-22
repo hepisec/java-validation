@@ -2,6 +2,7 @@ package de.hepisec.validation;
 
 import de.hepisec.validation.annotations.NotNullOrEmpty;
 import de.hepisec.validation.annotations.PossibleValues;
+import de.hepisec.validation.annotations.Range;
 import de.hepisec.validation.annotations.Url;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +30,7 @@ public class Validation {
         validationMap.put(NotNullOrEmpty.class, NotNullOrEmptyImpl.class);
         validationMap.put(PossibleValues.class, PossibleValuesImpl.class);
         validationMap.put(Url.class, UrlImpl.class);
+        validationMap.put(Range.class, RangeImpl.class);
     }
     
     /**
