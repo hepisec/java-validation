@@ -24,10 +24,14 @@ public class RangeImpl implements Validator {
 
         Logger.getLogger(Validation.class.getName()).log(Level.FINE, "Validating Range on {0}", field.getName());
 
-        Long val = Long.parseLong(value.toString());
+        try {
+            Long val = Long.parseLong(value.toString());
 
-        if (val < range.min() || val > range.max()) {
-            throw new ValidationException(val + " is outside the allowed range.");
+            if (val < range.min() || val > range.max()) {
+                throw new ValidationException(val + " is outside the allowed range.");
+            }
+        } catch (NumberFormatException ex) {
+            throw new ValidationException(value.toString() + " is not a number.");
         }
     }
 }
