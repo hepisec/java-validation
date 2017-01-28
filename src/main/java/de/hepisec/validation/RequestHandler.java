@@ -30,7 +30,7 @@ public class RequestHandler<T> extends Validation {
     /**
      * Create a new RequestHandler with an empty parameterPrefix
      *
-     * @param clazz
+     * @param clazz Class of type T
      */
     public RequestHandler(Class<T> clazz) {
         this(clazz, "");
@@ -39,10 +39,10 @@ public class RequestHandler<T> extends Validation {
     /**
      * Create a new RequestHandler with the given parameterPrefix
      *
-     * @param clazz
-     * @param parameterPrefix
+     * @param clazz Class of type T
+     * @param parameterPrefix prefix to find the correct parameters in the parameter map
      */
-    public RequestHandler(Class clazz, String parameterPrefix) {
+    public RequestHandler(Class<T> clazz, String parameterPrefix) {
         super();
         this.clazz = clazz;
         this.parameterPrefix = parameterPrefix;
@@ -51,7 +51,7 @@ public class RequestHandler<T> extends Validation {
     /**
      * Get the current parameterPrefix
      *
-     * @return
+     * @return the current parameterPrefix
      */
     public String getParameterPrefix() {
         return parameterPrefix;
@@ -60,7 +60,7 @@ public class RequestHandler<T> extends Validation {
     /**
      * Set the parameterPrefix
      *
-     * @param parameterPrefix
+     * @param parameterPrefix prefix to find the correct parameters in the parameter map
      */
     public void setParameterPrefix(String parameterPrefix) {
         this.parameterPrefix = parameterPrefix;
@@ -70,8 +70,8 @@ public class RequestHandler<T> extends Validation {
      * Get an validated object from the given parameters
      *
      * @param parameterMap typically obtained from a ServletRequest
-     * @return
-     * @throws de.hepisec.validation.ValidationException
+     * @return an Object of type T with properties set from the given parameters
+     * @throws ValidationException if the validation of the parameters fails
      */
     public T getObject(Map<String, String[]> parameterMap) throws ValidationException {
         return getObject(parameterMap, true);
@@ -82,7 +82,7 @@ public class RequestHandler<T> extends Validation {
      *
      * @param parameterMap typically obtained from a ServletRequest
      * @param validate set to false if the parameters should not get validated
-     * @return
+     * @return an Object of type T with properties set from the given parameters
      * @throws ValidationException if the validation of the parameters fails
      */
     public T getObject(Map<String, String[]> parameterMap, boolean validate) throws ValidationException {

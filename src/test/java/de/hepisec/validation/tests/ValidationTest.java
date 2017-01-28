@@ -223,7 +223,7 @@ public class ValidationTest {
             return notNullOrEmptyCollection;
         }
 
-        public void setNotNullOrEmptyCollection(List notNullOrEmptyCollection) {
+        public void setNotNullOrEmptyCollection(List<String> notNullOrEmptyCollection) {
             this.notNullOrEmptyCollection = notNullOrEmptyCollection;
         }
 

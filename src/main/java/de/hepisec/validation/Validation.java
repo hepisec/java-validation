@@ -4,6 +4,7 @@ import de.hepisec.validation.annotations.NotNullOrEmpty;
 import de.hepisec.validation.annotations.PossibleValues;
 import de.hepisec.validation.annotations.Range;
 import de.hepisec.validation.annotations.Url;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class Validation {
     
-    private final Map<Class, Class> validationMap;
+    private final Map<Class<? extends Annotation>, Class<?>> validationMap;
     
     public Validation() {
         /**
@@ -71,9 +72,9 @@ public class Validation {
         try {
             Object value = getMethod.invoke(object);
             
-            for (Map.Entry<Class, Class> entry : validationMap.entrySet()) {
+            for (Map.Entry<Class<? extends Annotation>, Class<?>> entry : validationMap.entrySet()) {
                 try {
-                    Class validatorClass = entry.getValue();
+                    Class<?> validatorClass = entry.getValue();
                     Object validator = validatorClass.getConstructor().newInstance();
                     Method validateMethod = validatorClass.getDeclaredMethod("validate", Field.class, Object.class);
                     validateMethod.invoke(validator, field, value);
@@ -98,7 +99,7 @@ public class Validation {
      * @param field to check
      */
     private boolean requiresValidation(Field field) {        
-        for (Class validationAnnotation : validationMap.keySet()) {
+        for (Class<? extends Annotation> validationAnnotation : validationMap.keySet()) {
             if (field.isAnnotationPresent(validationAnnotation)) {
                 return true;
             }
