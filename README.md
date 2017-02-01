@@ -2,6 +2,15 @@ This is a simple annotation based validation framework.
 
 Annotate your class properties and validate them easily.
 
+Installation
+============
+
+This package is available on Maven Central
+
+    <groupId>de.hepisec.validation</groupId>
+    <artifactId>validation</artifactId>
+    <version>1.2.0</version>
+
 Usage
 =====
 
