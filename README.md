@@ -9,7 +9,12 @@ This package is available on Maven Central
 
     <groupId>de.hepisec.validation</groupId>
     <artifactId>validation</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
+
+Changelog
+=========
+
+1.3.0 - Added @Regex and support for multiple @Range and @Regex annotations
 
 Usage
 =====
@@ -39,7 +44,39 @@ Annotations for your class properties:
         @Range(min = 10, max = 100)
         private int intNumber;
 
-        // getters and setters ...
+        // Java 7
+        @Ranges({
+            @Range(min = 1, max = 10),
+            @Range(min = 100, max = 110)
+        })
+        private int doubleRangeNumber7 = 2;
+
+        // Java 8
+        @Range(min = 1, max = 10)
+        @Range(min = 100, max = 110)
+        private int doubleRangeNumber8 = 2;
+
+        @Regex(pattern = "a+b+c+")
+        private String abc = "aaabbbccc";
+        
+        @Regex(pattern = "a+b+c+", dontMatch = true)
+        private String notAbc = "d";
+        
+        // Java 7
+        @Regexes({
+            @Regex(pattern = "a+b+c+"),
+            @Regex(pattern = "d+e+f+")
+        })
+        private String abcdef7 = "aaabbbccc";
+
+        // Java 8
+        @Regex(pattern = "a+b+c+")
+        @Regex(pattern = "d+e+f+")
+        private String abcdef8 = "aaabbbccc";
+
+        // getters and setters following the standard naming convention
+        // getProperty()
+        // setProperty(...)
     }
 
 

@@ -3,6 +3,7 @@ package de.hepisec.validation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -148,8 +149,8 @@ public class RequestHandler<T> extends Validation {
      * @param get
      */
     private void setValue(Method setMethod, T object, Class<?> type, String[] value) throws ValidationException {
-        if (type.isArray()) {
-            throw new ValidationException("Arrays are not supported by RequestHandler yet.");
+        if (type.isArray() || Collection.class.isAssignableFrom(type)) {
+            throw new ValidationException("Arrays and Collections are not supported by RequestHandler yet.");
         } else {
             setValue(setMethod, object, type, value[0]);
         }
@@ -164,10 +165,7 @@ public class RequestHandler<T> extends Validation {
      * @param type
      * @param get
      */
-    private void setValue(Method setMethod, T object, Class<?> type, String value) throws ValidationException {
-        Logger.getLogger(RequestHandler.class.getName()).info(type.getName());
-        Logger.getLogger(RequestHandler.class.getName()).info(Byte.class.getName());
-        
+    private void setValue(Method setMethod, T object, Class<?> type, String value) throws ValidationException {        
         if (type.equals(String.class)) {
             try {
                 setMethod.invoke(object, value);

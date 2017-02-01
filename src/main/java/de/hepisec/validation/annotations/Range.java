@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 /**
  * Use this annotation to specify the allowed range for integer values
  * 
+ * Multiple occurrences on the same property are allowed
+ * 
  * @author Hendrik Pilz
  */
 @Retention(RetentionPolicy.RUNTIME)

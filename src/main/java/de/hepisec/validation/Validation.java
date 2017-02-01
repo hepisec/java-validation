@@ -3,13 +3,18 @@ package de.hepisec.validation;
 import de.hepisec.validation.annotations.NotNullOrEmpty;
 import de.hepisec.validation.annotations.PossibleValues;
 import de.hepisec.validation.annotations.Range;
+import de.hepisec.validation.annotations.Ranges;
+import de.hepisec.validation.annotations.Regex;
+import de.hepisec.validation.annotations.Regexes;
 import de.hepisec.validation.annotations.Url;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,25 +23,29 @@ import java.util.logging.Logger;
  * @author Hendrik Pilz
  */
 public class Validation {
-    
-    private final Map<Class<? extends Annotation>, Class<?>> validationMap;
-    
+
+    private final Map<Class<? extends Annotation>, Validator> validatorMap;
+
     public Validation() {
         /**
          * all validators must be added to the validationMap
-         * 
-         * this could be replaced with a ClassLoader, which loads Validator implementations and Annotations automatically
+         *
+         * this could be replaced with a ClassLoader, which loads Validator
+         * implementations and Annotations automatically
          */
-        validationMap = new HashMap<>();
-        validationMap.put(NotNullOrEmpty.class, NotNullOrEmptyImpl.class);
-        validationMap.put(PossibleValues.class, PossibleValuesImpl.class);
-        validationMap.put(Url.class, UrlImpl.class);
-        validationMap.put(Range.class, RangeImpl.class);
+        validatorMap = new HashMap<>();
+        validatorMap.put(NotNullOrEmpty.class, new NotNullOrEmptyImpl());
+        validatorMap.put(PossibleValues.class, new PossibleValuesImpl());
+        validatorMap.put(Url.class, new UrlImpl());
+        validatorMap.put(Range.class, new RangeImpl());
+        validatorMap.put(Ranges.class, new RangesImpl());
+        validatorMap.put(Regex.class, new RegexImpl());
+        validatorMap.put(Regexes.class, new RegexesImpl());
     }
-    
+
     /**
      * Validate an object with Validation annotations
-     * 
+     *
      * @param object whose properties have to be validated
      * @throws ValidationException if the validation of a property has failed
      */
@@ -46,22 +55,23 @@ public class Validation {
 
         for (Field field : fields) {
             validate(object, field);
-        }        
+        }
     }
-    
+
     /**
      * Validate a specific field
-     * 
+     *
      * @param object whose properties have to be validated
      * @param field of the object to validate, all other fields are ignored
      * @throws ValidationException if the validation of the property has failed
      */
     public void validate(Object object, Field field) throws ValidationException {
-        if (!requiresValidation(field)) {
+        Annotation[] annotations = field.getAnnotations();
+
+        if (0 == annotations.length) {
             return;
         }
-        
-        Logger.getLogger(Validation.class.getName()).log(Level.FINE, "Validating field {0}", field.getName());
+
         Method getMethod = getGetter(object, field);
 
         if (getMethod == null) {
@@ -69,48 +79,36 @@ public class Validation {
             return;
         }
 
+        Logger.getLogger(Validation.class.getName()).log(Level.FINE, "Validating field {0}", field.getName());
+
         try {
             Object value = getMethod.invoke(object);
-            
-            for (Map.Entry<Class<? extends Annotation>, Class<?>> entry : validationMap.entrySet()) {
-                try {
-                    Class<?> validatorClass = entry.getValue();
-                    Object validator = validatorClass.getConstructor().newInstance();
-                    Method validateMethod = validatorClass.getDeclaredMethod("validate", Field.class, Object.class);
-                    validateMethod.invoke(validator, field, value);
-                } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
-                    Logger.getLogger(Validation.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);                    
-                } catch (InvocationTargetException ex) {
-                    Throwable cause = ex.getCause();
-                    
-                    if (cause != null) {
-                        throw new ValidationException(cause.getMessage());
-                    }                    
+            /**
+             * We iterate over all annotations and remember each executed validator to run each validator only once
+             * If a validator supports multiple annotations of the same type, it must iterate the annotations itself
+             */
+            Set<Validator> executedValidators = new HashSet<>();
+
+            for (Annotation annotation : annotations) {
+                if (!validatorMap.containsKey(annotation.annotationType())) {
+                    continue;
+                }
+                
+                Validator validator = validatorMap.get(annotation.annotationType());
+                
+                if (!executedValidators.contains(validator)) {                
+                    validator.validate(field, value);
+                    executedValidators.add(validator);
                 }
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(Validation.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);           
+            Logger.getLogger(Validation.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
-    
-    /**
-     * Helper method to determine, whether the field requires validation
-     * 
-     * @param field to check
-     */
-    private boolean requiresValidation(Field field) {        
-        for (Class<? extends Annotation> validationAnnotation : validationMap.keySet()) {
-            if (field.isAnnotationPresent(validationAnnotation)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }      
-    
+
     /**
      * Helper method to find the get method for a given field
-     * 
+     *
      * @param field to find the get method for
      * @return the get method or null if no get method is found
      */
@@ -125,5 +123,5 @@ public class Validation {
         } catch (NoSuchMethodException | SecurityException ex) {
             return null;
         }
-    }    
+    }
 }
