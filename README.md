@@ -15,6 +15,7 @@ Changelog
 =========
 
 1.3.1 - Added RequestHandler.apply()
+
 1.3.0 - Added @Regex and support for multiple @Range and @Regex annotations
 
 Usage
