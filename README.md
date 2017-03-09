@@ -9,11 +9,12 @@ This package is available on Maven Central
 
     <groupId>de.hepisec.validation</groupId>
     <artifactId>validation</artifactId>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
 
 Changelog
 =========
 
+1.3.1 - Added RequestHandler.apply()
 1.3.0 - Added @Regex and support for multiple @Range and @Regex annotations
 
 Usage
@@ -103,3 +104,18 @@ You can also use the RequestHandler class to easily receive an Object with prope
 
     // unsafeObject is not validated
     ClassWithValidation unsafeObject = requestHandler.getObject(parameters, false);
+
+
+Or update an existing object
+
+
+    ClassWithValidation object = ...
+    Map<String, String[]> parameters = httpServletRequest.getParameterMap();
+
+    RequestHandler<ClassWithValidation> requestHandler = new RequestHandler<>(ClassWithValidation.class);
+    // object is validated automatically
+    requestHandler.apply(object, parameters);
+
+    // object is not validated
+    requestHandler.apply(object, parameters, false);
+
