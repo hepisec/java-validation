@@ -10,11 +10,12 @@ import java.util.logging.Logger;
 
 /**
  * This is a shorthand class to create an object from request parameters
- * 
+ *
  * @author Hendrik Pilz
  * @param <T> the type which is returned by the RequestHandler
  */
 public class RequestHandler<T> extends Validation {
+
     public static final String PRIMITIVE_BYTE = "byte";
     public static final String PRIMITIVE_SHORT = "short";
     public static final String PRIMITIVE_INT = "int";
@@ -23,8 +24,7 @@ public class RequestHandler<T> extends Validation {
     public static final String PRIMITIVE_DOUBLE = "double";
     public static final String PRIMITIVE_BOOLEAN = "boolean";
     public static final String PRIMITIVE_CHAR = "char";
-    
-    
+
     private Class<T> clazz;
     private String parameterPrefix;
 
@@ -41,7 +41,8 @@ public class RequestHandler<T> extends Validation {
      * Create a new RequestHandler with the given parameterPrefix
      *
      * @param clazz Class of type T
-     * @param parameterPrefix prefix to find the correct parameters in the parameter map
+     * @param parameterPrefix prefix to find the correct parameters in the
+     * parameter map
      */
     public RequestHandler(Class<T> clazz, String parameterPrefix) {
         super();
@@ -61,7 +62,8 @@ public class RequestHandler<T> extends Validation {
     /**
      * Set the parameterPrefix
      *
-     * @param parameterPrefix prefix to find the correct parameters in the parameter map
+     * @param parameterPrefix prefix to find the correct parameters in the
+     * parameter map
      */
     public void setParameterPrefix(String parameterPrefix) {
         this.parameterPrefix = parameterPrefix;
@@ -89,28 +91,49 @@ public class RequestHandler<T> extends Validation {
     public T getObject(Map<String, String[]> parameterMap, boolean validate) throws ValidationException {
         try {
             T object = clazz.newInstance();
-
-            Field[] fields = clazz.getDeclaredFields();
-
-            for (Field field : fields) {
-                String paramName = parameterPrefix + field.getName();
-
-                if (parameterMap.containsKey(paramName)) {
-                    Method setMethod = getSetter(object, field);
-
-                    if (setMethod != null) {
-                        setValue(setMethod, object, field.getType(), parameterMap.get(paramName));
-                    }
-                }
-            }
-
-            if (validate) {
-                validate(object);
-            }
-
+            apply(object, parameterMap, validate);            
             return object;
         } catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
             throw new ValidationException(ex);
+        }
+    }
+
+    /**
+     * Apply and validate the given parameters on the given instance
+     * 
+     * @param instance where the parameters shall be applied
+     * @param parameterMap typically obtained from a ServletRequest
+     * @throws ValidationException 
+     */
+    public void apply(T instance, Map<String, String[]> parameterMap) throws ValidationException {
+        apply(instance, parameterMap, true);
+    }
+
+    /**
+     * Apply and validate the given parameters on the given instance
+     * 
+     * @param instance where the parameters shall be applied
+     * @param parameterMap typically obtained from a ServletRequest
+     * @param validate set to false if the parameters should not get validated
+     * @throws ValidationException 
+     */
+    public void apply(T instance, Map<String, String[]> parameterMap, boolean validate) throws ValidationException {
+        Field[] fields = clazz.getDeclaredFields();
+
+        for (Field field : fields) {
+            String paramName = parameterPrefix + field.getName();
+
+            if (parameterMap.containsKey(paramName)) {
+                Method setMethod = getSetter(instance, field);
+
+                if (setMethod != null) {
+                    setValue(setMethod, instance, field.getType(), parameterMap.get(paramName));
+                }
+            }
+        }
+
+        if (validate) {
+            validate(instance);
         }
     }
 
@@ -127,7 +150,7 @@ public class RequestHandler<T> extends Validation {
 
         try {
             Method[] methods = object.getClass().getDeclaredMethods();
-            
+
             for (Method method : methods) {
                 if (method.getName().equals(methodName)) {
                     return method;
@@ -135,8 +158,8 @@ public class RequestHandler<T> extends Validation {
             }
         } catch (SecurityException ex) {
         }
-        
-        return null;        
+
+        return null;
     }
 
     /**
@@ -165,7 +188,7 @@ public class RequestHandler<T> extends Validation {
      * @param type
      * @param get
      */
-    private void setValue(Method setMethod, T object, Class<?> type, String value) throws ValidationException {        
+    private void setValue(Method setMethod, T object, Class<?> type, String value) throws ValidationException {
         if (type.equals(String.class)) {
             try {
                 setMethod.invoke(object, value);
@@ -233,7 +256,7 @@ public class RequestHandler<T> extends Validation {
                 throw new ValidationException(ex);
             }
         } else {
-            throw new ValidationException("Only primitive types and Strings are supported by RequestHandler. Failed type: " + type.getName());            
+            throw new ValidationException("Only primitive types and Strings are supported by RequestHandler. Failed type: " + type.getName());
         }
     }
 }
