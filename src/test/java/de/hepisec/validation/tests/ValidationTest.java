@@ -17,6 +17,15 @@ import static org.junit.Assert.*;
  */
 public class ValidationTest {
     
+    @Deprecated
+    private String field;
+    
+    @Deprecated
+    private String text;
+    
+    @NotNullOrEmpty
+    private String privateField;    
+    
     public ValidationTest() {
     }
     
@@ -152,6 +161,20 @@ public class ValidationTest {
         }        
     }
         
+    @Test
+    public void testValidateNoGetter() throws Exception {
+        Validation validation = new Validation();
+        validation.validate(this);
+    }
+ 
+    public String getText() {
+        return text;
+    }
+    
+    private String getPrivateField() {
+        return privateField;
+    }    
+    
     public class ClassWithValidation {
         @NotNullOrEmpty
         private String notNullOrEmpty = "notNullOrEmpty";

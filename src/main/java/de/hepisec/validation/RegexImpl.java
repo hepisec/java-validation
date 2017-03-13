@@ -25,7 +25,7 @@ public class RegexImpl implements Validator {
 
         Annotation[] annotations = field.getAnnotations();
 
-        if (0 == annotations.length) {
+        if (0 == annotations.length || !field.isAnnotationPresent(Regex.class)) {
             return;
         }
 

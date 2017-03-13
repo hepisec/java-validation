@@ -91,7 +91,7 @@ public class RequestHandler<T> extends Validation {
     public T getObject(Map<String, String[]> parameterMap, boolean validate) throws ValidationException {
         try {
             T object = clazz.newInstance();
-            apply(object, parameterMap, validate);            
+            apply(object, parameterMap, validate);
             return object;
         } catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
             throw new ValidationException(ex);
@@ -100,10 +100,10 @@ public class RequestHandler<T> extends Validation {
 
     /**
      * Apply and validate the given parameters on the given instance
-     * 
+     *
      * @param instance where the parameters shall be applied
      * @param parameterMap typically obtained from a ServletRequest
-     * @throws ValidationException 
+     * @throws ValidationException
      */
     public void apply(T instance, Map<String, String[]> parameterMap) throws ValidationException {
         apply(instance, parameterMap, true);
@@ -111,11 +111,11 @@ public class RequestHandler<T> extends Validation {
 
     /**
      * Apply and validate the given parameters on the given instance
-     * 
+     *
      * @param instance where the parameters shall be applied
      * @param parameterMap typically obtained from a ServletRequest
      * @param validate set to false if the parameters should not get validated
-     * @throws ValidationException 
+     * @throws ValidationException
      */
     public void apply(T instance, Map<String, String[]> parameterMap, boolean validate) throws ValidationException {
         Field[] fields = clazz.getDeclaredFields();
@@ -189,74 +189,42 @@ public class RequestHandler<T> extends Validation {
      * @param get
      */
     private void setValue(Method setMethod, T object, Class<?> type, String value) throws ValidationException {
-        if (type.equals(String.class)) {
-            try {
+        try {
+            if (type.equals(String.class)) {
                 setMethod.invoke(object, value);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_BYTE.equals(type.getName()) || type.equals(Byte.class)) {
-            try {
+            } else if (PRIMITIVE_BYTE.equals(type.getName()) || type.equals(Byte.class)) {
                 byte v = Byte.parseByte(value);
                 setMethod.invoke(object, v);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_SHORT.equals(type.getName()) || type.equals(Short.class)) {
-            try {
+            } else if (PRIMITIVE_SHORT.equals(type.getName()) || type.equals(Short.class)) {
                 short v = Short.parseShort(value);
                 setMethod.invoke(object, v);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_INT.equals(type.getName()) || type.equals(Integer.class)) {
-            try {
+            } else if (PRIMITIVE_INT.equals(type.getName()) || type.equals(Integer.class)) {
                 int v = Integer.parseInt(value);
                 setMethod.invoke(object, v);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_LONG.equals(type.getName()) || type.equals(Long.class)) {
-            try {
+            } else if (PRIMITIVE_LONG.equals(type.getName()) || type.equals(Long.class)) {
                 long v = Long.parseLong(value);
                 setMethod.invoke(object, v);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_FLOAT.equals(type.getName()) || type.equals(Float.class)) {
-            try {
+            } else if (PRIMITIVE_FLOAT.equals(type.getName()) || type.equals(Float.class)) {
                 float v = Float.parseFloat(value);
                 setMethod.invoke(object, v);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_DOUBLE.equals(type.getName()) || type.equals(Double.class)) {
-            try {
+            } else if (PRIMITIVE_DOUBLE.equals(type.getName()) || type.equals(Double.class)) {
                 double v = Double.parseDouble(value);
                 setMethod.invoke(object, v);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_BOOLEAN.equals(type.getName()) || type.equals(Boolean.class)) {
-            try {
+            } else if (PRIMITIVE_BOOLEAN.equals(type.getName()) || type.equals(Boolean.class)) {
                 boolean v = Boolean.parseBoolean(value);
                 setMethod.invoke(object, v);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
-            }
-        } else if (PRIMITIVE_CHAR.equals(type.getName()) || type.equals(Character.class)) {
-            try {
+            } else if (PRIMITIVE_CHAR.equals(type.getName()) || type.equals(Character.class)) {
                 if (value.length() > 1) {
                     throw new ValidationException("Illegal char value.");
                 } else {
-                    long v = value.charAt(0);
+                    char v = value.charAt(0);
                     setMethod.invoke(object, v);
                 }
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new ValidationException(ex);
+            } else {
+                throw new ValidationException("Only primitive types and Strings are supported by RequestHandler. Failed type: " + type.getName());
             }
-        } else {
-            throw new ValidationException("Only primitive types and Strings are supported by RequestHandler. Failed type: " + type.getName());
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            throw new ValidationException(ex);
         }
     }
 }
