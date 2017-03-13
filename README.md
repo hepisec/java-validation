@@ -9,10 +9,12 @@ This package is available on Maven Central
 
     <groupId>de.hepisec.validation</groupId>
     <artifactId>validation</artifactId>
-    <version>1.3.1</version>
+    <version>1.3.2</version>
 
 Changelog
 =========
+
+1.3.2 - Improved test coverage
 
 1.3.1 - Added RequestHandler.apply()
 

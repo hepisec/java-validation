@@ -23,7 +23,7 @@ public class RangeImpl implements Validator {
 
         Annotation[] annotations = field.getAnnotations();
 
-        if (0 == annotations.length) {
+        if (0 == annotations.length || !field.isAnnotationPresent(Range.class)) {
             return;
         }
 
