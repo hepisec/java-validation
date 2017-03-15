@@ -1,9 +1,12 @@
 package de.hepisec.validation;
 
+import de.hepisec.validation.annotations.DateFormat;
+import de.hepisec.validation.converter.DateConverter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -124,11 +127,7 @@ public class RequestHandler<T> extends Validation {
             String paramName = parameterPrefix + field.getName();
 
             if (parameterMap.containsKey(paramName)) {
-                Method setMethod = getSetter(instance, field);
-
-                if (setMethod != null) {
-                    setValue(setMethod, instance, field.getType(), parameterMap.get(paramName));
-                }
+                setValue(instance, field, parameterMap.get(paramName));
             }
         }
 
@@ -171,11 +170,13 @@ public class RequestHandler<T> extends Validation {
      * @param type
      * @param get
      */
-    private void setValue(Method setMethod, T object, Class<?> type, String[] value) throws ValidationException {
+    private void setValue(T object, Field field, String[] value) throws ValidationException {
+        Class<?> type = field.getType();
+        
         if (type.isArray() || Collection.class.isAssignableFrom(type)) {
             throw new ValidationException("Arrays and Collections are not supported by RequestHandler yet.");
         } else {
-            setValue(setMethod, object, type, value[0]);
+            setValue(object, field, value[0]);
         }
     }
 
@@ -188,7 +189,14 @@ public class RequestHandler<T> extends Validation {
      * @param type
      * @param get
      */
-    private void setValue(Method setMethod, T object, Class<?> type, String value) throws ValidationException {
+    private void setValue(T object, Field field, String value) throws ValidationException {
+        Class<?> type = field.getType();
+        Method setMethod = getSetter(object, field);
+        
+        if (null == setMethod) {
+            return;
+        }        
+        
         try {
             if (type.equals(String.class)) {
                 setMethod.invoke(object, value);
@@ -220,8 +228,22 @@ public class RequestHandler<T> extends Validation {
                     char v = value.charAt(0);
                     setMethod.invoke(object, v);
                 }
+            } else if (type.equals(Date.class)) {
+                if (!field.isAnnotationPresent(DateFormat.class)) {
+                    throw new ValidationException("Missing DateFormat annotation for field " + field.getName() + ".");
+                }
+                
+                DateFormat df = field.getAnnotation(DateFormat.class);
+                DateConverter dc = new DateConverter(df.format());
+                Date date = dc.convert(value);
+                
+                if (null == date) {
+                    throw new ValidationException("Couldn't parse date for field " + field.getName() + ".");
+                }
+                
+                setMethod.invoke(object, date);
             } else {
-                throw new ValidationException("Only primitive types and Strings are supported by RequestHandler. Failed type: " + type.getName());
+                throw new ValidationException("The type of field " + field.getName() + " is not supported by RequestHandler. Failed type: " + type.getName());
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new ValidationException(ex);

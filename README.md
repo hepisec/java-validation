@@ -9,10 +9,12 @@ This package is available on Maven Central
 
     <groupId>de.hepisec.validation</groupId>
     <artifactId>validation</artifactId>
-    <version>1.3.2</version>
+    <version>1.4.0</version>
 
 Changelog
 =========
+
+1.4.0 - Added @DateFormat, which is used by RequestHandler to set java.util.Date properties
 
 1.3.2 - Improved test coverage
 
